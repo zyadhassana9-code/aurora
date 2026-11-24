@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora — Digital Studio</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --bg:#07070d; --ink:#f2f2f7; --dim:#9a9ab0; --violet:#7c5cff; --cyan:#3ee6ff; --pink:#ff5ca8; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--ink); font-family:'Segoe UI', system-ui, sans-serif; overflow-x:hidden; cursor:none; }
+  #aurora-canvas { position:fixed; inset:0; z-index:0; }
+  .cursor { position:fixed; width:22px; height:22px; border:1.5px solid var(--cyan); border-radius:50%; pointer-events:none; z-index:99; transition:transform .15s ease, background .15s; mix-blend-mode:difference; }
+  .cursor.grow { transform:scale(2.4); background:rgba(62,230,255,.25); }
+  nav { position:fixed; top:0; width:100%; display:flex; justify-content:space-between; align-items:center; padding:26px 6vw; z-index:10; backdrop-filter:blur(10px); background:rgba(7,7,13,.35); border-bottom:1px solid rgba(255,255,255,.06); }
+  .logo { font-size:22px; font-weight:800; letter-spacing:2px; }
+  .logo span { color:var(--cyan); }
+  nav ul { display:flex; gap:36px; list-style:none; }
+  nav a { color:var(--dim); text-decoration:none; font-size:14px; letter-spacing:1px; transition:color .3s; }
+  nav a:hover { color:var(--ink); }
+  .nav-cta { padding:10px 24px; border:1px solid var(--violet); border-radius:40px; color:var(--ink) !important; transition:.3s; }
+  .nav-cta:hover { background:var(--violet); box-shadow:0 0 30px rgba(124,92,255,.5); }
+  header { position:relative; z-index:2; min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:0 6vw; }
+  .tag { color:var(--cyan); letter-spacing:4px; font-size:13px; text-transform:uppercase; margin-bottom:22px; animation:rise 1s .3s; }
+  h1 { font-size:clamp(44px, 8vw, 110px); line-height:1.02; font-weight:900; letter-spacing:-2px; animation:rise 1s .5s; }
+  h1 .grad { background:linear-gradient(90deg, var(--violet), var(--cyan), var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sub { margin-top:28px; max-width:520px; color:var(--dim); font-size:18px; line-height:1.7; animation:rise 1s .7s; }
+  .hero-btns { margin-top:44px; display:flex; gap:18px; animation:rise 1s .9s; }
+  .btn { padding:16px 38px; border-radius:50px; font-size:15px; font-weight:600; text-decoration:none; transition:.3s; }
+  .btn-fill { background:linear-gradient(90deg, var(--violet), var(--pink)); color:#fff; }
+  .btn-fill:hover { box-shadow:0 0 40px rgba(255,92,168,.45); transform:translateY(-3px); }
+  .btn-ghost { border:1px solid rgba(255,255,255,.25); color:var(--ink); }
+  .btn-ghost:hover { border-color:var(--cyan); color:var(--cyan); }
+  @keyframes rise { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:none; } }
+  section { position:relative; z-index:2; padding:120px 6vw; }
+  .sec-head { font-size:13px; letter-spacing:4px; color:var(--cyan); text-transform:uppercase; margin-bottom:14px; }
+  h2 { font-size:clamp(30px,4.5vw,56px); font-weight:800; letter-spacing:-1px; margin-bottom:60px; }
+  .services { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:24px; }
+  .card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:44px 34px; transition:.4s; position:relative; overflow:hidden; }
+  .card::before { content:''; position:absolute; inset:0; background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%), rgba(124,92,255,.16), transparent 45%); opacity:0; transition:opacity .3s; }
+  .card:hover::before { opacity:1; }
+  .card:hover { transform:translateY(-8px); border-color:rgba(124,92,255,.5); }
+  .card .num { font-size:14px; color:var(--violet); font-weight:700; }
+  .card h3 { font-size:24px; margin:16px 0 12px; }
+  .card p { color:var(--dim); line-height:1.7; font-size:15px; }
+  .marquee { white-space:nowrap; overflow:hidden; border-top:1px solid rgba(255,255,255,.08); border-bottom:1px solid rgba(255,255,255,.08); padding:26px 0; }
+  .marquee-inner { display:inline-block; animation:scroll 22s linear infinite; font-size:26px; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,.25); }
+  .marquee-inner span { margin:0 34px; }
+  .marquee-inner b { color:var(--cyan); }
+  @keyframes scroll { to { transform:translateX(-50%); } }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:24px; text-align:center; }
+  .stat .val { font-size:56px; font-weight:900; background:linear-gradient(180deg,#fff, var(--violet)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .stat .lbl { color:var(--dim); margin-top:8px; letter-spacing:1px; font-size:14px; }
+  footer { position:relative; z-index:2; padding:80px 6vw 40px; border-top:1px solid rgba(255,255,255,.08); display:flex; flex-wrap:wrap; justify-content:space-between; gap:30px; }
+  footer .big { font-size:clamp(26px,3.5vw,44px); font-weight:800; }
+  footer a.mail { color:var(--cyan); text-decoration:none; }
+  .copy { width:100%; color:var(--dim); font-size:13px; margin-top:40px; }
+  @media (max-width:760px){ body{cursor:auto;} .cursor{display:none;} nav ul{display:none;} }
+</style>
+</head>
+<body>
+<canvas id="aurora-canvas"></canvas>
+<div class="cursor" id="cursor"></div>
+<nav>
+  <div class="logo">AURORA<span>.</span></div>
+  <ul>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#studio">Studio</a></li>
+    <li><a href="#contact" class="nav-cta">Start a project</a></li>
+  </ul>
+</nav>
+<header>
+  <div class="tag">Digital Studio — Cairo / Dubai / Remote</div>
+  <h1>We build<br><span class="grad">impossible</span> brands.</h1>
+  <p class="sub">Aurora is a creative studio crafting identities, websites and products for companies that refuse to be ordinary.</p>
+  <div class="hero-btns">
+    <a href="#work" class="btn btn-fill">See our work</a>
+    <a href="#contact" class="btn btn-ghost">Talk to us</a>
+  </div>
+</header>
+<div class="marquee"><div class="marquee-inner" id="mq"></div></div>
+<section id="services">
+  <div class="sec-head">What we do</div>
+  <h2>Capabilities</h2>
+  <div class="services">
+    <div class="card"><div class="num">01</div><h3>Brand Identity</h3><p>Naming, logo systems, art direction and guidelines that make a brand unmistakable at a glance.</p></div>
+    <div class="card"><div class="num">02</div><h3>Web Experiences</h3><p>Award-calibre websites with motion, 3D and interaction design that turn visitors into believers.</p></div>
+    <div class="card"><div class="num">03</div><h3>Product Design</h3><p>Interfaces for apps and platforms, from first wireframe to a design system your team can scale.</p></div>
+    <div class="card"><div class="num">04</div><h3>Motion & 3D</h3><p>Cinematic launches, product films and real-time 3D that give your story a pulse.</p></div>
+  </div>
+</section>
+<section id="studio">
+  <div class="sec-head">The studio in numbers</div>
+  <h2>Proof, not promises</h2>
+  <div class="stats">
+    <div class="stat"><div class="val" data-count="87">0</div><div class="lbl">Projects shipped</div></div>
+    <div class="stat"><div class="val" data-count="14">0</div><div class="lbl">Design awards</div></div>
+    <div class="stat"><div class="val" data-count="32">0</div><div class="lbl">Happy clients</div></div>
+    <div class="stat"><div class="val" data-count="9">0</div><div class="lbl">Countries served</div></div>
+  </div>
+</section>
+<footer id="contact">
+  <div class="big">Have an idea?<br><a class="mail" href="mailto:hello@aurora.studio">hello@aurora.studio</a></div>
+  <div class="copy">© 2026 Aurora Studio. Made with light.</div>
+</footer>
+<script>
+  // Aurora canvas background
+  const c = document.getElementById('aurora-canvas'), x = c.getContext('2d');
+  let w, h; const resize = () => { w = c.width = innerWidth; h = c.height = innerHeight; };
+  resize(); addEventListener('resize', resize);
+  const blobs = [
+    {x:.25,y:.3,r:.45,c:'124,92,255',s:.00022,p:0},
+    {x:.75,y:.55,r:.5,c:'62,230,255',s:.00017,p:2},
+    {x:.5,y:.85,r:.42,c:'255,92,168',s:.00026,p:4}
+  ];
+  function draw(t){
+    x.clearRect(0,0,w,h);
+    blobs.forEach(b=>{
+      const bx = (b.x + Math.sin(t*b.s + b.p)*.14) * w;
+      const by = (b.y + Math.cos(t*b.s*1.2 + b.p)*.12) * h;
+      const g = x.createRadialGradient(bx,by,0,bx,by,b.r*Math.min(w,h));
+      g.addColorStop(0, `rgba(${b.c},.35)`); g.addColorStop(1,'rgba(0,0,0,0)');
+      x.fillStyle = g; x.fillRect(0,0,w,h);
+    });
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+  // Custom cursor
+  const cur = document.getElementById('cursor');
+  addEventListener('mousemove', e => { cur.style.left = e.clientX-11+'px'; cur.style.top = e.clientY-11+'px'; });
+  document.querySelectorAll('a,.card').forEach(el => {
+    el.addEventListener('mouseenter',()=>cur.classList.add('grow'));
+    el.addEventListener('mouseleave',()=>cur.classList.remove('grow'));
+  });
+  // Spotlight on cards
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('mousemove', e=>{
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX-r.left)+'px');
+      card.style.setProperty('--my', (e.clientY-r.top)+'px');
+    });
+  });
+  // Marquee content
+  const words = ['STRATEGY','<b>•</b>','IDENTITY','<b>•</b>','WEB','<b>•</b>','MOTION','<b>•</b>','3D','<b>•</b>','PRODUCT','<b>•</b>'];
+  document.getElementById('mq').innerHTML = (words.map(w=>`<span>${w}</span>`).join('')).repeat(4);
+  // Count-up stats
+  const io = new IntersectionObserver(es => es.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const el = e.target, target = +el.dataset.count; let n = 0;
+    const step = () => { n += Math.max(1, Math.ceil(target/40)); if(n>=target) n=target; el.textContent = n; if(n<target) requestAnimationFrame(step); };
+    step(); io.unobserve(el);
+  }), {threshold:.6});
+  document.querySelectorAll('[data-count]').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
